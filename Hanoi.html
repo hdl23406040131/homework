@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div class="pillar" style="left: 100px;"></div>
+        <div class="pillar" style="left: 300px;"></div>
+        <div class="pillar" style="left: 500px;"></div>
+    </div>
+    <select id="numDisks">
+        <option value="3">3 Disks</option>
+        <option value="4">4 Disks</option>
+        <option value="5">5 Disks</option>
+    </select>
+    <button id="startButton">Start</button>
+    <button id="pauseButton">Pause</button>
+    <button id="resumeButton">Resume</button>
+    <select id="speedControl">
+        <option value="1000">Slow</option>
+        <option value="500">Medium</option>
+        <option value="200">Fast</option>
+    </select>
+    <script src="script.js"></script>
+</body>
+</html>
