@@ -28,3 +28,91 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+
+#gameContainer {
+    position: relative;
+    height: 400px;
+    width: 600px;
+    border: 1px solid black;
+}
+
+.pillar {
+    width: 10px;
+    height: 300px;
+    background-color: gray;
+    position: absolute;
+    bottom: 0;
+}
+
+.disk {
+    position: absolute;
+    height: 20px;
+    bottom: 0;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+}
+
+
+
+
+
+let intervalId;
+let currentSpeed = 1000; // Default speed
+
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('pauseButton').addEventListener('click', () => clearTimeout(intervalId));
+document.getElementById('resumeButton').addEventListener('click', () => moveDisks(0, 2, 1, parseInt(document.getElementById('numDisks').value)));
+document.getElementById('speedControl').addEventListener('change', (event) => {
+    currentSpeed = parseInt(event.target.value);
+});
+
+function startGame() {
+    const numDisks = parseInt(document.getElementById('numDisks').value);
+    setupDisks(numDisks);
+    moveDisks(0, 2, 1, numDisks);
+}
+
+function setupDisks(numDisks) {
+    const container = document.getElementById('gameContainer');
+    container.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+        const pillar = document.createElement('div');
+        pillar.className = 'pillar';
+        pillar.style.left = `${100 + 200 * i}px`;
+        container.appendChild(pillar);
+    }
+    for (let i = 0; i < numDisks; i++) {
+        const disk = document.createElement('div');
+        disk.className = 'disk';
+        disk.style.width = `${60 - i * 10}px`;
+        disk.style.bottom = `${20 * i}px`;
+        disk.style.left = `${115 - (60 - i * 10) / 2}px`;
+        disk.innerText = i + 1;
+        container.children[0].appendChild(disk);
+    }
+}
+
+function moveDisks(fromPeg, toPeg, viaPeg, numDisks) {
+    if (numDisks === 1) {
+        animateMove(fromPeg, toPeg);
+    } else {
+        moveDisks(fromPeg, viaPeg, toPeg, numDisks - 1);
+        animateMove(fromPeg, toPeg);
+        moveDisks(viaPeg, toPeg, fromPeg, numDisks - 1);
+    }
+}
+
+function animateMove(fromPeg, toPeg) {
+    // This should ideally be a proper animation function
+    console.log(`Move disk from ${fromPeg} to ${toPeg}`);
+    // Dummy timeout to simulate animation
+    intervalId = setTimeout(() => {}, currentSpeed);
+}
+
+// Initialize game
+setupDisks(3); // Default to 3 disks for initial load
