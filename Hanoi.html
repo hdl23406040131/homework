@@ -1,118 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower of Hanoi</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+
+<html>
 <body>
-    <div id="gameContainer">
-        <div class="pillar" style="left: 100px;"></div>
-        <div class="pillar" style="left: 300px;"></div>
-        <div class="pillar" style="left: 500px;"></div>
-    </div>
-    <select id="numDisks">
-        <option value="3">3 Disks</option>
-        <option value="4">4 Disks</option>
-        <option value="5">5 Disks</option>
-    </select>
-    <button id="startButton">Start</button>
-    <button id="pauseButton">Pause</button>
-    <button id="resumeButton">Resume</button>
-    <select id="speedControl">
-        <option value="1000">Slow</option>
-        <option value="500">Medium</option>
-        <option value="200">Fast</option>
-    </select>
-    <script src="script.js"></script>
-</body>
-</html>
 
 
+Number of Disks to play<select id =numdisks></select>
+<input id =startbtn type=button onclick=startgame() class=button1 value=Start
+onmouseenter="showhint('Start the game','Start')" onmouseout=hidehint('Start')>
 
-
-
-#gameContainer {
-    position: relative;
-    height: 400px;
-    width: 600px;
-    border: 1px solid black;
+<input id =pausebtn type=button onclick=startgame() class=button1 value=Pause>
+<input id =resumebtn type=button onclick=startgame() class=button1 value=Resume>
+Period  Time<select id=period></select>
+<script>
+let  s=document.getElementById('numdisks');
+for(let n=0;n<10;n++)
+    s.options[n]=new Option(3+n,3+n);
+ s=document.getElementById('period');
+for(let n=0;n<5;n++)
+    s.options[n]=new Option(0.5*(n+1),0.5*(n+1));
+var handle;
+var orderOflnstruction = 0;
+function startgame()
+{
+     let  s=document.getElementByld('numdisks');
+     N = s.options[s.selectedIndex].value;
+     tower(N);
+     move();
+     movedish(0);
 }
 
-.pillar {
-    width: 10px;
-    height: 300px;
-    background-color: gray;
-    position: absolute;
-    bottom: 0;
+function pausegame()
+{
+     clearTimeout(handle);
 }
 
-.disk {
-    position: absolute;
-    height: 20px;
-    bottom: 0;
-    text-align: center;
-    color: white;
-    font-weight: bold;
+function resumegame()
+{
+     movedish(orderOflnstruction);
 }
-
-
-
-
-
-let intervalId;
-let currentSpeed = 1000; // Default speed
-
-document.getElementById('startButton').addEventListener('click', startGame);
-document.getElementById('pauseButton').addEventListener('click', () => clearTimeout(intervalId));
-document.getElementById('resumeButton').addEventListener('click', () => moveDisks(0, 2, 1, parseInt(document.getElementById('numDisks').value)));
-document.getElementById('speedControl').addEventListener('change', (event) => {
-    currentSpeed = parseInt(event.target.value);
-});
-
-function startGame() {
-    const numDisks = parseInt(document.getElementById('numDisks').value);
-    setupDisks(numDisks);
-    moveDisks(0, 2, 1, numDisks);
+function showhint(hint,btnvalue)
+{
+     let  dv=document.createElement('div');
+     dv.id=btnvalue;
+     dv.style.cssText='position:absolute;left:200px;top:300px;background-olor:yellow;color:purple;border-radius:4px;box-shadow:2px -2px #676787';
+     dv.innerHTML = hint;
+     document.body.appendChild(dv);
 }
-
-function setupDisks(numDisks) {
-    const container = document.getElementById('gameContainer');
-    container.innerHTML = '';
-    for (let i = 0; i < 3; i++) {
-        const pillar = document.createElement('div');
-        pillar.className = 'pillar';
-        pillar.style.left = `${100 + 200 * i}px`;
-        container.appendChild(pillar);
-    }
-    for (let i = 0; i < numDisks; i++) {
-        const disk = document.createElement('div');
-        disk.className = 'disk';
-        disk.style.width = `${60 - i * 10}px`;
-        disk.style.bottom = `${20 * i}px`;
-        disk.style.left = `${115 - (60 - i * 10) / 2}px`;
-        disk.innerText = i + 1;
-        container.children[0].appendChild(disk);
-    }
+function hidehint(btnvalue)
+{
+    let dv = document.getElementById(btnvalue);
+    dv.parentNode.removeChild(dv);
 }
-
-function moveDisks(fromPeg, toPeg, viaPeg, numDisks) {
-    if (numDisks === 1) {
-        animateMove(fromPeg, toPeg);
-    } else {
-        moveDisks(fromPeg, viaPeg, toPeg, numDisks - 1);
-        animateMove(fromPeg, toPeg);
-        moveDisks(viaPeg, toPeg, fromPeg, numDisks - 1);
-    }
+let time;
+window.onblur = function()
+{
+    time = (new Date()).getTime();  console.log(time);
 }
-
-function animateMove(fromPeg, toPeg) {
-    // This should ideally be a proper animation function
-    console.log(`Move disk from ${fromPeg} to ${toPeg}`);
-    // Dummy timeout to simulate animation
-    intervalId = setTimeout(() => {}, currentSpeed);
+window.onfocus = function(){
+     let time1 = (new Date()).getTime();
+     let diff = time1-time;
+     showhint('You have left for' + diff + 'milliseconds','time');
+     setTimeout("hidehint('time')",7000);
 }
-
-// Initialize game
-setupDisks(3); // Default to 3 disks for initial load
+</script>
