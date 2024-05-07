@@ -1,0 +1,50 @@
+This is a presentation
+regular expression:
+
+regular expression represents a text pattern
+
+reserved characters:
+.  represents any char
+* reepresents 0 or more
+   e.g,    [0]*   matches  0000000000
++ represents 1 or more
+? represents 0 or 1     [0]?   str=",str1='0'
+     "3.00".replace(/\.[0]*/,");
+$  representss the end of string
+^  (usage1) represents the beginning of the string
+    (usage2) represents NOT,used inside square bracket[]
+
+  better write:
+    "3.00".replace(/[\.][0]*$/,");  delete only zeros at tail,but not
+   in the middle
+
+  "abcd".replace(/bc/,")   deletes bc
+  but     "abcd".replacee(/^bc/,") does not delete bc
+  ^b  means leading b
+
+  [^b] means NOT b
+
+  "ac".replace(/^[^b]/,'x') ---->  "Xc", but
+  "bc".replace(/^[^b]/,'x') does not match
+\s    empty space, \t
+\d    digits
+[0-9]  digits
+[a-z]    lower alphabets
+[A-Z]   a capital letter
+
+()    stores matchs stringg and to be used later in replacing
+      "xyz12*?3.5sdsd".replace(/([a-z]+)(.*)/([a-z]+)/, '$1$2');
+      holds more characters to be  matched at least one
+      [0-9]  [0123456789]
+      "a".replace(/[0-9]/, ") --------> "a"
+      "a1a".replace(/a[0-9]a/, ") ---------> ""
+      (sounds "pipe"), means logical OR
+[a|b|d]   matches a or b or d
+
+{}     specifies number of occurances:
+       [a-z]{6}     means     6 letters
+
+In Javascript, use RegExp class/function to create a regular expression,
+       let r = new RegExp(/\n[0-9]/g);
+
+   let text = "\n\n\n1.ancw\n\n\n\www\n2.fgfgfgf\n\n\n3 dd";
