@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tower of Hanoi</title>
+    <style>
+        canvas { background-color: #f0f0f0; }
+        #controls { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <canvas id="hanoiCanvas" width="600" height="400"></canvas>
+    <div id="controls">
+        <label for="numDisks">Disk-number：</label>
+        <select id="numDisks">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+        <button onclick="startGame()">Start</button>
+        <button onclick="pauseGame()">Pause</button>
+        <button onclick="resumeGame()">Resume</button>
+        <label for="speedControl">Speed：</label>
+        <select id="speedControl">
+            <option value="500">Slow</option>
+            <option value="300">Medium</option>
+            <option value="100">Fast</option>
+        </select>
+        <button onclick="showHints()">Hint</button>
+        <textarea id="hintsBox" rows="10" cols="30" readonly></textarea>
+    </div>
+    <script>
+        // 获取canvas元素并设置绘图上下文
+        const canvas = document.getElementById('hanoiCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationSpeed = 300; // Default speed in ms
+
+        // 设置初始参数
+        let numDisks = 3; // 圆盘数量默认为3
+        const towerWidth = 10;
+        const towerHeight = 150;
+        const diskHeight = 20;
+        const diskIncrement = 20; // 圆盘宽度递增量
+        let towers = [[], [], []]; // 三根柱子
+        let draggingDisk = null; // 当前拖动的圆盘
+        let draggingOffsetX = 0;
+        let draggingOffsetY = 0;
+        let gamePaused = false;
+
+        document.getElementById('numDisks').addEventListener('change', function() {
+            numDisks = parseInt(this.value, 10);
+        });
+
+        document.getElementById('speedControl').addEventListener('change', function() {
+            animationSpeed = parseInt(this.value, 10);
+        });
+
+        function initGame(numDisks) {
+            towers = [[], [], []]; // 重置游戏状态
+            for (let i = 0; i < numDisks; i++) {
+                towers[0].push({
+                    width: (numDisks - i) * diskIncrement + 60,
+                    height: diskHeight,
+                    color: `rgb(${Math.random() * 255}, ${Math.random()
+                      * 255}, ${Math.random() * 255})`
+                });
+            }
+            draw();
+        }
+
+        function startGame() {
+            initGame(numDisks);
+        }
+
+        function pauseGame() {
+            gamePaused = true;
+        }
+
+        function resumeGame() {
+            gamePaused = false;
+            requestAnimationFrame(draw);
+        }
+
+        function draw() {
+            if (gamePaused) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+            for (let i = 0; i <= 2; i++) {
+                ctx.fillStyle = 'black';
+                ctx.fillRect(100 + 200 * i - towerWidth / 2, canvas.height - towerHeight, towerWidth, towerHeight);
+            }
+            for (let i = 0; i < 3; i++) {
+                const tower = towers[i];
+                for (let j = 0; j < tower.length; j++) {
+                    const disk = tower[j];
+                    ctx.fillStyle = disk.color;
+                    ctx.fillRect(100 + 200 * i - disk.width / 2, canvas.height - (j + 1) * diskHeight, disk.width, disk.height);
+                }
+            }
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.fillText('A', 100, canvas.height - towerHeight - 20);
+            ctx.fillText('B', 300, canvas.height - towerHeight - 20);
+            ctx.fillText('C', 500, canvas.height - towerHeight - 20);
+        }
+
+        function showHints() {
+            const steps = [];
+            const stepNumber = [1];
+            generateHanoiSteps(numDisks, 'A', 'C', 'B', steps, stepNumber);
+            document.getElementById('hintsBox').value = steps.join("\n");
+        }
+
+        function generateHanoiSteps(n, source, target, auxiliary, steps, stepNumber) {
+            if (n > 0) {
+                generateHanoiSteps(n - 1, source, auxiliary, target, steps, stepNumber);
+                steps.push(stepNumber[0] + ". " + source + " → " + target);
+                stepNumber[0] += 1;
+                generateHanoiSteps(n - 1, auxiliary, target, source, steps, stepNumber);
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
