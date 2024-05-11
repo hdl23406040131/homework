@@ -188,7 +188,7 @@ function getMousePos(canvas, evt) {
 // 检查是否胜利
 function checkWin() {
     if (towers[0].length === 0 && towers[1].length === 0) {
-        alert('恭喜你，成功解决汉诺塔问题！');
+        alert('Congratulations on solving the Tower of Hanoi problem!');
     }
 }
  
@@ -211,15 +211,6 @@ function generateHanoiSteps(n, source, target, auxiliary, steps, stepNumber) {
             const stepNumber = [1];
             generateHanoiSteps(numDisks, 'A', 'C', 'B', steps, stepNumber);
             document.getElementById('hintsBox').value = steps.join("\n");
-        }
-
-        function generateHanoiSteps(n, source, target, auxiliary, steps, stepNumber) {
-            if (n > 0) {
-                generateHanoiSteps(n - 1, source, auxiliary, target, steps, stepNumber);
-                steps.push(stepNumber[0] + ". " + source + " → " + target);
-                stepNumber[0] += 1;
-                generateHanoiSteps(n - 1, auxiliary, target, source, steps, stepNumber);
-            }
         }
 
         startGame();
