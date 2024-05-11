@@ -1,80 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tower of Hanoi</title>
+    <title>3D Tower of Hanoi</title>
     <style>
-        canvas { background-color: #f0f0f0; }
+        canvas { background-color: #eee; width: 100%; max-width: 600px; height: auto; display: block; }
         #controls { margin-top: 10px; }
     </style>
 </head>
 <body>
     <canvas id="hanoiCanvas" width="600" height="400"></canvas>
     <div id="controls">
-        <label for="numDisks">Disk-number：</label>
+        <label for="numDisks">Number of Disks:</label>
         <select id="numDisks">
-            <option value="1">1</option>
-            <option value="2">2</option>
             <option value="3" selected>3</option>
             <option value="4">4</option>
             <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
         </select>
-        <button onclick="startGame()">Start</button>
+        <button onclick="startGame()">Start Game</button>
         <button onclick="pauseGame()">Pause</button>
         <button onclick="resumeGame()">Resume</button>
-        <label for="speedControl">Speed：</label>
+        <label for="speedControl">Animation Speed:</label>
         <select id="speedControl">
-            <option value="500">Slow</option>
-            <option value="300">Medium</option>
-            <option value="100">Fast</option>
+            <option value="2000">Slow</option>
+            <option value="1000" selected>Normal</option>
+            <option value="500">Fast</option>
         </select>
-        <button onclick="showHints()">Hint</button>
-        <textarea id="hintsBox" rows="10" cols="30" readonly></textarea>
     </div>
     <script>
-        // 获取canvas元素并设置绘图上下文
         const canvas = document.getElementById('hanoiCanvas');
         const ctx = canvas.getContext('2d');
-        let animationSpeed = 300; // Default speed in ms
-
-        // 设置初始参数
-        let numDisks = 3; // 圆盘数量默认为3
-        const towerWidth = 10;
-        const towerHeight = 150;
-        const diskHeight = 20;
-        const diskIncrement = 20; // 圆盘宽度递增量
-        let towers = [[], [], []]; // 三根柱子
-        let draggingDisk = null; // 当前拖动的圆盘
-        let draggingOffsetX = 0;
-        let draggingOffsetY = 0;
+        let numDisks = 3;
+        let speed = 1000; // Speed of the animation
         let gamePaused = false;
+        let towers = [[], [], []];
+        const pillarHeight = 120; // Height of the pillars
+        const pillarWidth = 10; // Width of the pillars
+        const baseY = 400 - pillarHeight; // Adjusted base line at the bottom of the pillars
 
         document.getElementById('numDisks').addEventListener('change', function() {
-            numDisks = parseInt(this.value, 10);
+            numDisks = parseInt(this.value);
+            initGame();
         });
 
         document.getElementById('speedControl').addEventListener('change', function() {
-            animationSpeed = parseInt(this.value, 10);
+            speed = parseInt(this.value);
         });
 
-        function initGame(numDisks) {
-            towers = [[], [], []]; // 重置游戏状态
-            for (let i = 0; i < numDisks; i++) {
-                towers[0].push({
-                    width: (numDisks - i) * diskIncrement + 60,
-                    height: diskHeight,
-                    color: `rgb(${Math.random() * 255}, ${Math.random()
-                      * 255}, ${Math.random() * 255})`
-                });
+        function initGame() {
+            towers = [[], [], []];
+            for (let i = numDisks; i > 0; i--) {
+                let color = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
+                towers[0].push({size: i, color: color});
             }
             draw();
+            solveHanoi(numDisks, 0, 2, 1, () => {
+                console.log("Puzzle solved!");
+            });
+        }
+
+        function solveHanoi(n, from, to, via, callback) {
+            if (n === 0) {
+                callback();
+                return;
+            }
+            solveHanoi(n - 1, from, via, to, () => {
+                animateMove(from, to, () => {
+                    solveHanoi(n - 1, via, to, from, callback);
+                });
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPillars();
+            towers.forEach((tower, index) => {
+                let y = baseY; // Adjusted to align with the base of the pillar
+                tower.forEach(disk => {
+                    draw3DCylinder(100 + index * 200, y - 20, disk.size * 15, 18, disk.color);
+                    y -= 20; // Decreasing y coordinate to stack disks upwards
+                });
+            });
+        }
+
+        function drawPillars() {
+            for (let i = 0; i < 3; i++) {
+                draw3DCylinder(100 + i * 200, baseY + 20, pillarWidth, pillarHeight, '#666');
+            }
+        }
+
+        function draw3DCylinder(x, y, radius, height, color) {
+            // Draw the cylinder top
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.ellipse(x, y - height, radius, radius / 3, 0, Math.PI, 2 * Math.PI);
+            ctx.fill();
+
+            // Draw the cylinder body
+            ctx.fillStyle = color;
+            ctx.fillRect(x - radius, y - height, radius * 2, height);
+
+            // Draw the cylinder bottom
+            ctx.beginPath();
+            ctx.ellipse(x, y, radius, radius / 3, 0, 0, Math.PI);
+            ctx.fill();
+        }
+
+        function animateMove(from, to, callback) {
+            const disk = towers[from].pop();
+            const startX = 100 + from * 200;
+            const endX = 100 + to * 200;
+            const startY = baseY - 20 * towers[from].length;
+            const endY = baseY - 20 * towers[to].length;
+
+            let progress = 0;
+            function move() {
+                if (gamePaused) {
+                    requestAnimationFrame(move);
+                    return;
+                }
+                progress += 10 / speed;
+                if (progress < 1) {
+                    const currentX = startX + (endX - startX) * progress;
+                    const currentY = startY + (endY - startY) * progress - 50 * Math.sin(Math.PI * progress);
+                    draw();
+                    draw3DCylinder(currentX, currentY, disk.size * 15, 18, disk.color);
+                    requestAnimationFrame(move);
+                } else {
+                    towers[to].push(disk);
+                    draw();
+                    callback();
+                }
+            }
+            requestAnimationFrame(move);
         }
 
         function startGame() {
-            initGame(numDisks);
+            if (!gamePaused || towers[0].length === numDisks) {
+                initGame();
+            } else {
+                resumeGame();
+            }
         }
 
         function pauseGame() {
@@ -83,137 +149,8 @@
 
         function resumeGame() {
             gamePaused = false;
-            requestAnimationFrame(draw);
+            draw();
         }
-
-        function draw() {
-            if (gamePaused) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
-            for (let i = 0; i <= 2; i++) {
-                ctx.fillStyle = 'black';
-                ctx.fillRect(100 + 200 * i - towerWidth / 2, canvas.height - towerHeight, towerWidth, towerHeight);
-            }
-            for (let i = 0; i < 3; i++) {
-                const tower = towers[i];
-                for (let j = 0; j < tower.length; j++) {
-                    const disk = tower[j];
-                    ctx.fillStyle = disk.color;
-                    ctx.fillRect(100 + 200 * i - disk.width / 2, canvas.height - (j + 1) * diskHeight, disk.width, disk.height);
-                }
-            }
-            ctx.font = '20px Arial';
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'center';
-            ctx.fillText('A', 100, canvas.height - towerHeight - 20);
-            ctx.fillText('B', 300, canvas.height - towerHeight - 20);
-            ctx.fillText('C', 500, canvas.height - towerHeight - 20);
-        }
-
-        // 鼠标按下事件处理
-canvas.onmousedown = function(e) {
-    const mousePos = getMousePos(canvas, e);
-    for (let i = 2; i >= 0; i--) {
-        const tower = towers[i];
-        if (tower.length > 0) {
-            const topDisk = tower[tower.length - 1];
-            const centerX = 100 + 200 * i;
-            const centerY = canvas.height - tower.length * diskHeight + diskHeight / 2;
-            if (Math.abs(mousePos.x - centerX) <= topDisk.width / 2 && Math.abs(mousePos.y - centerY) <= diskHeight / 2) {
-                draggingDisk = tower.pop();
-                draggingOffsetX = centerX - mousePos.x;
-                draggingOffsetY = centerY - mousePos.y;
-                draw();
-                return;
-            }
-        }
-    }
-};
- 
-// 鼠标移动事件处理
-canvas.onmousemove = function(e) {
-    if (draggingDisk) {
-        const mousePos = getMousePos(canvas, e);
-        const centerX = mousePos.x + draggingOffsetX;
-        const centerY = mousePos.y + draggingOffsetY;
-        // 清空画布并重新绘制所有元素，包括被拖动的圆盘
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        draw();
-        // 绘制被拖动的圆盘
-        ctx.fillStyle = draggingDisk.color;
-        ctx.fillRect(centerX - draggingDisk.width / 2, centerY - diskHeight / 2, draggingDisk.width, diskHeight);
-    }
-};
- 
-// 鼠标释放事件处理
-canvas.onmouseup = function(e) {
-    if (draggingDisk) {
-        const mousePos = getMousePos(canvas, e);
-        // 确定圆盘应该放置的柱子
-        let targetTowerIndex = Math.floor(mousePos.x / 200);
-        if (targetTowerIndex < 0) targetTowerIndex = 0;
-        if (targetTowerIndex > 2) targetTowerIndex = 2;
- 
-        // 检查是否可以将圆盘放到目标柱子上
-        if (canPlaceDiskOnTower(draggingDisk, towers[targetTowerIndex])) {
-            towers[targetTowerIndex].push(draggingDisk);
-        } else {
-            // 如果不能放置，则将圆盘返回原柱子
-            towers[Math.floor((draggingOffsetX + 100) / 200)].push(draggingDisk);
-        }
- 
-        draggingDisk = null;
-        draw();
-        checkWin();
-    }
-};
- 
-// 检查圆盘是否可以放置到目标柱子上
-function canPlaceDiskOnTower(disk, tower) {
-    if (tower.length === 0) {
-        return true; // 目标柱子为空，则可以放置
-    }
-    const topDisk = tower[tower.length - 1];
-    return disk.width < topDisk.width; // 只能放在更大的圆盘上
-}
- 
-// 获取鼠标位置
-function getMousePos(canvas, evt) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-    };
-}
- 
-// 检查是否胜利
-function checkWin() {
-    if (towers[0].length === 0 && towers[1].length === 0) {
-        alert('Congratulations on solving the Tower of Hanoi problem!');
-    }
-}
- 
-// 生成汉诺塔的解决步骤
-//接收当前圆盘的数量n，源柱子source，目标柱子target，辅助柱子auxiliary，steps数组来存储所有的移动步骤，stepNumber步骤序号
-function generateHanoiSteps(n, source, target, auxiliary, steps, stepNumber) {
-    if (n > 0) {
-        // 将n-1个圆盘从源柱子移动到辅助柱子
-        generateHanoiSteps(n - 1, source, auxiliary, target, steps, stepNumber);
-        // 将第n个圆盘从源柱子移动到目标柱子，并添加步骤序号
-        steps.push(stepNumber[0] + ". " + source + " → " + target);
-        stepNumber[0] += 1; // 更新步骤序号
-        // 将n-1个圆盘从辅助柱子移动到目标柱子
-        generateHanoiSteps(n - 1, auxiliary, target, source, steps, stepNumber);
-    }
-}
-
-        function showHints() {
-            const steps = [];
-            const stepNumber = [1];
-            generateHanoiSteps(numDisks, 'A', 'C', 'B', steps, stepNumber);
-            document.getElementById('hintsBox').value = steps.join("\n");
-        }
-
-        startGame();
     </script>
 </body>
 </html>
