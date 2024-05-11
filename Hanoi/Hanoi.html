@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>    
+    <meta charset="UTF-8">
+    <title>Tower of Hanoi</title>
+    <style>
+        canvas { background-color: #f0f0f0; }
+        #controls { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <canvas id="hanoiCanvas" width="600" height="400"></canvas>
+    <div id="controls">
+        <label for="numDisks">Disk-number：</label>
+        <select id="numDisks">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+        <button onclick="startGame()">Start</button>
+        <button onclick="pauseGame()">Pause</button>
+        <button onclick="resumeGame()">Resume</button>
+        <label for="speedControl">Speed：</label>
+        <select id="speedControl">
+            <option value="500">Slow</option>
+            <option value="300">Medium</option>
+            <option value="100">Fast</option>
+        </select>
+        <button onclick="showHints()">Hint</button>
+        <textarea id="hintsBox" rows="10" cols="30" readonly></textarea>
+    </div>
+    <script src="hanoi.js"></script>
+</body>
+</html>
